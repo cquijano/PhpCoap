@@ -27,13 +27,19 @@ class PacketBuffer extends \Evenement\EventEmitter
         }
 	}
 
+	private static function to_ipv6 ($address){
+		$port=strrpos ( $address, ':' );
+		$str = '['. substr($address, 0, $port) . ']' . substr($address, $port);
+		return $str;
+	}
+
 	function handleSend()
 	{
 		$pkt = array_shift( $this->packets );
 
-		if ( $pkt['peer'] !== null )
-			stream_socket_sendto( $this->sock, $pkt['data'], 0, $pkt['peer'] );
-		else
+		if ( $pkt['peer'] !== null ){
+			stream_socket_sendto( $this->sock, $pkt['data'], 0, self::to_ipv6($pkt['peer']) );
+		}else
 			stream_socket_sendto( $this->sock, $pkt['data'] );
 
 		$this->packet = null;
